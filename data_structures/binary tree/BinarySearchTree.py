@@ -68,16 +68,20 @@ class BinarySearchTree(object):
                 par_node.setRight(new_node)
             new_node.setParent(par_node)
 
-    def getNode(self,data):
+    def getNode(self,data,root=None):
+        if root is None:
+            root = self.getRoot()
         cur_node = None
         if not self.empty():
-            cur_node = self.root
-            while (cur_node is not None) and (cur_node.getData() is not data):
+            cur_node = root
+            while (cur_node is not None) and (cur_node.getData() != data):
                 if data < cur_node.getData():
                     cur_node = cur_node.getLeft()
                 else:
                     cur_node = cur_node.getRight()
         return cur_node
+
+
     """
     取二叉树中某个节点下最大值，默认从二叉搜索树根开始查找
     """
@@ -101,12 +105,71 @@ class BinarySearchTree(object):
                 cur_node = cur_node.getLeft()
         return cur_node
 
+    '''
+    二叉搜索树的删除，分为三种情况：
+        1.删除的节点是树叶：直接删除该节点，先判断该节点是父节点的左点还是右节点，
+    直接将其父节点的左（右）节点的值设置为None
+    
+        2.删除的节点只有左（右）节点：先判断该节点是父节点的左点还是右节点，
+    直接修改父节点的左（右）值为其子节点，子节点parent值为父节点
+        
+        3.删除的节点有左右节点，取此节点右子树的最小值节点的值，将此节点的值赋值为此值，
+    然后删除此最小节点（递归操作）
+    
+    需要考虑的问题：
+        4.如果一个BST中有相同值得节点，需要删除此节点时，如何解决？ 
+    解决方法函数中设置一个参数root,默认为Ｎone
+    
+    '''
+
+
+    def delete(self,data,root=None):
+        #获取要删除的节点地址
+        if root is None:
+            root = self.getRoot()
+        node = self.getNode(data,root)
+        #
+        if node is not None:
+            left = node.getLeft()
+            right = node.getRight()
+            par = node.getParent()
+            if not left and not right:
+                if data < par.getData():
+                    par.setLeft(None)
+                else:
+                    par.getRight(None)
+            elif left and right:
+                min = self.getMin(right)
+                mindata = min.getData()
+                if data == mindata:
+                    min = self.getMin(min)
+                self.delete(mindata,min)
+                node.setData(mindata)
+            else:
+                if data < par.getData():
+                    if right is None:
+                        node.getLeft().setParent(par)
+                        par.setLeft(left)
+                    else:
+                        node.getRight().setParent(par)
+                        par.setLeft(right)
+                else:
+                    if right is None:
+                        node.getLeft().setParent(par)
+                        par.setRight(left)
+                    else:
+                        node.getRight().setParent(par)
+                        par.setRight(right)
+
+
+
+
 
     def traversal(self):
         list = []
         if not self.empty():
             cur_node = self.root
-            return  self.__InOrderTraversal(cur_node)
+            return self.__InOrderTraversal(cur_node)
 
 
     '''
@@ -216,6 +279,7 @@ class BinarySearchTree(object):
 t = BinarySearchTree()
 t.insert(8)
 t.insert(3)
+t.insert(3)
 t.insert(5)
 t.insert(2)
 t.insert(4)
@@ -227,19 +291,14 @@ t.insert(0)
 t.insert(10)
 t.insert(19)
 t.insert(-6)
-t.insert(3)
-# n7 = t.getNode(9)
-# print(t.getRoot())
-# print(t.getRoot().getLeft().getLeft())
-# print(t.getRoot().getLeft().getLeft().getRight())
-# print(t.getRoot().getLeft().getRight())
-# print(t.getRoot().getRight())
-# print(n7)
-# print(t.getMax().getData())
-# print("---------------------")
-# print(t.getMin().getData())
-# print("---------------------")
 
-list = t.InTraversal()
+
+
+t.display()
+t.delete(8)
+t.delete(3)
+t.delete(3)
+
+print("------------------")
 t.display()
 
